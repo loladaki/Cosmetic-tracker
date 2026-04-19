@@ -1,0 +1,29 @@
+name: Scraper Cosmetica
+
+on:
+  schedule:
+    - cron: '0 8 * * *'   # todos os dias às 8h UTC
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias
+        run: pip install requests beautifulsoup4 psycopg2-binary
+
+      - name: Executar scraper cosmetica
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GMAIL_USER:   ${{ secrets.GMAIL_USER }}
+          GMAIL_PASS:   ${{ secrets.GMAIL_PASS }}
+          EMAIL_DEST:   ${{ secrets.EMAIL_DEST }}
+        run: python scraper_cosmetica.py
