@@ -14,29 +14,29 @@ import time
 # formato: "ID": ("Nome do produto", "URL")
 
 produtos = {
-    "P01": ("Serum de Rosto Fluido UV Diario FPS 50+ Nivea",              "https://www.continente.pt/produto/serum-de-rosto-fluido-uv-diario-fps-50-nivea-nivea-8215194.html"),
-    "P02": ("Creme de Rosto Dia Q10 Energy Antirrugas FPS15 Nivea",       "https://www.continente.pt/produto/creme-de-rosto-dia-q10-energy-antirrugas-fps15-nivea-nivea-5028703.html"),
-    "P03": ("Serum Facial Glow Beauty of Joseon",                         "https://www.continente.pt/produto/serum-facial-glow-beauty-of-joseon-beauty-of-joseon-7983861.html"),
-    "P04": ("Creme de Rosto Dynasty Beauty of Joseon",                    "https://www.continente.pt/produto/creme-de-rosto-dynasty-beauty-of-joseon-beauty-of-joseon-7983865.html"),
-    "P05": ("Serum Facial Preenchedor Aloe Hialuronico Garnier",          "https://www.continente.pt/produto/serum-facial-preenchedor-aloe-hialuronico-garnier-skin-active-garnier-skin-active-7713344.html"),
-    "P06": ("Serum Facial Revitalift Filler Antirrugas Loreal",           "https://www.continente.pt/produto/serum-facial-revitalift-filler-antirrugas-loreal-paris-loreal-paris-7094090.html"),
-    "P07": ("Serum Facial Revitalift Clinical Vitamina C Loreal",         "https://www.continente.pt/produto/serum-facial-revitalift-clinical-vitamina-c-loreal-paris-loreal-paris-7713327.html"),
-    "P08": ("Creme Dia Cellular Luminous 630 Antimanchas FPS50 Nivea",    "https://www.continente.pt/produto/creme-de-rosto-dia-cellular-luminous-630-antimanchas-fps50-30-nivea-nivea-7341889.html"),
-    "P09": ("Serum Facial Noite Revitalift Laser Loreal",                 "https://www.continente.pt/produto/serum-facial-noite-revitalift-laser-loreal-paris-loreal-paris-7346510.html"),
-    "P10": ("Serum de Rosto Rejuvenescedor Cellular Epigenetics Nivea",   "https://www.continente.pt/produto/serum-de-rosto-rejuvenescedor-cellular-epigenetics-nivea-nivea-8457679.html"),
-    "P11": ("Serum Facial Antimanchas Vitamina C Garnier",                "https://www.continente.pt/produto/serum-facial-antimanchas-vitamina-c-garnier-skin-active-garnier-skin-active-7514731.html"),
-    "P12": ("Serum de Rosto Q10 Dupla Acao Nivea",                       "https://www.continente.pt/produto/serum-de-rosto-q10-dupla-acao-nivea-nivea-7985612.html"),
-    "P13": ("Serum de Rosto Cellular Luminous 630 Antimanchas Nivea",     "https://www.continente.pt/produto/serum-de-rosto-cellular-luminous-630-antimanchas-nivea-nivea-7341888.html"),
-    "P14": ("Serum Facial Age Perfect LE Duo Rejuvenescedor Loreal",      "https://www.continente.pt/produto/serum-facial-age-perfect-le-duo-rejuvenescedor-loreal-paris-loreal-paris-8110588.html"),
-    "P15": ("Creme de Rosto Dia Revitalift Filler FPS 50 Loreal",         "https://www.continente.pt/produto/creme-de-rosto-dia-revitalift-filler-fps-50-loreal-paris-loreal-paris-7382344.html"),
-    "P16": ("Creme de Rosto Dia Revitalift Filler Micro Gel Loreal",      "https://www.continente.pt/produto/creme-de-rosto-dia-revitalift-filler-micro-gel-loreal-paris-loreal-paris-7713331.html"),
-    "P17": ("Serum Facial Vitamina C FPS 25 Garnier",                     "https://www.continente.pt/produto/serum-facial-vitamina-c-fps-25-garnier-skin-active-garnier-skin-active-7514729.html"),
-    "P18": ("BB Cream Bege Brilhante N.13 Missha",                        "https://www.continente.pt/produto/bb-cream-bege-brilhante-n.13-missha-missha-7983880.html"),
-    "P19": ("Serum de Rosto Antirugas Q10 Collagen Expert Nivea",         "https://www.continente.pt/produto/serum-de-rosto-antirugas-q10-collagen-expert-nivea-nivea-8716894.html"),
-    "P20": ("Serum Facial Revitalift Antirrugas e Reparacao Loreal",      "https://www.continente.pt/produto/serum-facial-revitalift-antirrugas-e-reparacao-loreal-paris-loreal-paris-7801609.html"),
+    "Serum de Rosto Fluido UV Diario FPS 50+ Nivea":                "https://www.continente.pt/produto/serum-de-rosto-fluido-uv-diario-fps-50-nivea-nivea-8215194.html",
+    "Creme de Rosto Dia Q10 Energy Antirrugas FPS15 Nivea":         "https://www.continente.pt/produto/creme-de-rosto-dia-q10-energy-antirrugas-fps15-nivea-nivea-5028703.html",
+    "Serum Facial Glow Beauty of Joseon":                           "https://www.continente.pt/produto/serum-facial-glow-beauty-of-joseon-beauty-of-joseon-7983861.html",
+    "Creme de Rosto Dynasty Beauty of Joseon":                      "https://www.continente.pt/produto/creme-de-rosto-dynasty-beauty-of-joseon-beauty-of-joseon-7983865.html",
+    "Serum Facial Preenchedor Aloe Hialuronico Garnier":            "https://www.continente.pt/produto/serum-facial-preenchedor-aloe-hialuronico-garnier-skin-active-garnier-skin-active-7713344.html",
+    "Serum Facial Revitalift Filler Antirrugas Loreal":             "https://www.continente.pt/produto/serum-facial-revitalift-filler-antirrugas-loreal-paris-loreal-paris-7094090.html",
+    "Serum Facial Revitalift Clinical Vitamina C Loreal":           "https://www.continente.pt/produto/serum-facial-revitalift-clinical-vitamina-c-loreal-paris-loreal-paris-7713327.html",
+    "Creme Dia Cellular Luminous 630 Antimanchas FPS50 Nivea":      "https://www.continente.pt/produto/creme-de-rosto-dia-cellular-luminous-630-antimanchas-fps50-30-nivea-nivea-7341889.html",
+    "Serum Facial Noite Revitalift Laser Loreal":                   "https://www.continente.pt/produto/serum-facial-noite-revitalift-laser-loreal-paris-loreal-paris-7346510.html",
+    "Serum de Rosto Rejuvenescedor Cellular Epigenetics Nivea":     "https://www.continente.pt/produto/serum-de-rosto-rejuvenescedor-cellular-epigenetics-nivea-nivea-8457679.html",
+    "Serum Facial Antimanchas Vitamina C Garnier":                  "https://www.continente.pt/produto/serum-facial-antimanchas-vitamina-c-garnier-skin-active-garnier-skin-active-7514731.html",
+    "Serum de Rosto Q10 Dupla Acao Nivea":                         "https://www.continente.pt/produto/serum-de-rosto-q10-dupla-acao-nivea-nivea-7985612.html",
+    "Serum de Rosto Cellular Luminous 630 Antimanchas Nivea":       "https://www.continente.pt/produto/serum-de-rosto-cellular-luminous-630-antimanchas-nivea-nivea-7341888.html",
+    "Serum Facial Age Perfect LE Duo Rejuvenescedor Loreal":        "https://www.continente.pt/produto/serum-facial-age-perfect-le-duo-rejuvenescedor-loreal-paris-loreal-paris-8110588.html",
+    "Creme de Rosto Dia Revitalift Filler FPS 50 Loreal":           "https://www.continente.pt/produto/creme-de-rosto-dia-revitalift-filler-fps-50-loreal-paris-loreal-paris-7382344.html",
+    "Creme de Rosto Dia Revitalift Filler Micro Gel Loreal":        "https://www.continente.pt/produto/creme-de-rosto-dia-revitalift-filler-micro-gel-loreal-paris-loreal-paris-7713331.html",
+    "Serum Facial Vitamina C FPS 25 Garnier":                       "https://www.continente.pt/produto/serum-facial-vitamina-c-fps-25-garnier-skin-active-garnier-skin-active-7514729.html",
+    "BB Cream Bege Brilhante N.13 Missha":                          "https://www.continente.pt/produto/bb-cream-bege-brilhante-n.13-missha-missha-7983880.html",
+    "Serum de Rosto Antirugas Q10 Collagen Expert Nivea":           "https://www.continente.pt/produto/serum-de-rosto-antirugas-q10-collagen-expert-nivea-nivea-8716894.html",
+    "Serum Facial Revitalift Antirrugas e Reparacao Loreal":        "https://www.continente.pt/produto/serum-facial-revitalift-antirrugas-e-reparacao-loreal-paris-loreal-paris-7801609.html",
 }
 
-MIN_SEMANAS = 4
+MIN_SEMANAS = 2
 
 
 # EXTRAÇÃO DE PREÇOS
