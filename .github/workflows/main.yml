@@ -26,4 +26,4 @@ jobs:
           GMAIL_USER:   ${{ secrets.GMAIL_USER }}
           GMAIL_PASS:   ${{ secrets.GMAIL_PASS }}
           EMAIL_DEST:   ${{ secrets.EMAIL_DEST }}
-        run: python scraper_cosmetica.py
+        run: python scraper_cosmeticaV2.py
