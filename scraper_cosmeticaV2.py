@@ -8,6 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import date, timedelta
 import time
+from decimal import Decimal
 
 
 # PRODUTOS DE COSMETICA
@@ -145,7 +146,7 @@ def analisar_alertas(cursor, hoje, dados):
                 "pvpr":       pvpr,
                 "desc_hoje":  round(desc_hoje, 1),
                 "media_desc": round(media_desc_hist, 1),
-                "diferenca":  round(desc_hoje - media_desc_hist, 1),
+                "diferenca":  round(Decimal(desc_hoje) - media_desc_hist, 1),
                 "euros_hoje": euros_hoje,
                 "n_semanas":  n_semanas,
             })
