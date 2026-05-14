@@ -37,7 +37,8 @@ produtos = {
     "P20": ("Serum Facial Revitalift Antirrugas e Reparacao Loreal",        "https://www.continente.pt/produto/serum-facial-revitalift-antirrugas-e-reparacao-loreal-paris-loreal-paris-7801609.html"),
 }
 
-MIN_SEMANAS = 2
+MIN_SEMANAS    = 2
+MIN_DIFF_MEDIA = 10   # pp acima da media historica para disparar alerta
 
 
 # EXTRAÇÃO DE PREÇOS
@@ -138,7 +139,8 @@ def analisar_alertas(cursor, hoje, dados):
         media_desc_hist   = sum(descontos_hist) / len(descontos_hist) if descontos_hist else None
         preco_minimo_hist = min(precos_min_hist) if precos_min_hist else None
 
-        if media_desc_hist and desc_hoje > media_desc_hist:
+        diff_media = float(Decimal(str(desc_hoje)) - Decimal(str(media_desc_hist))) if media_desc_hist else 0
+        if media_desc_hist and diff_media >= MIN_DIFF_MEDIA:
             alertas_media.append({
                 "produto_id": produto_id,
                 "produto":    nome,
@@ -334,5 +336,50 @@ if alertas_media or alertas_minimo:
     enviar_email(hoje, alertas_media, alertas_minimo)
 else:
     print(f"Sem alertas para hoje ({hoje}).")
+
+# GUARDAR HISTÓRICO DE ALERTAS
+# Requer tabela no Supabase (executar uma vez):
+#
+#   CREATE TABLE cosmetica_alertas (
+#     id              SERIAL PRIMARY KEY,
+#     data            DATE    NOT NULL,
+#     produto_id      TEXT    NOT NULL,
+#     produto         TEXT    NOT NULL,
+#     tipo            TEXT    NOT NULL,   -- 'media' ou 'minimo'
+#     preco           NUMERIC,
+#     desconto_percent NUMERIC,
+#     diff_media      NUMERIC,
+#     preco_minimo_hist NUMERIC,
+#     UNIQUE (data, produto_id, tipo)
+#   );
+#   ALTER TABLE cosmetica_alertas ENABLE ROW LEVEL SECURITY;
+#   CREATE POLICY "anon_read" ON cosmetica_alertas FOR SELECT TO anon USING (true);
+
+for a in alertas_media:
+    try:
+        cursor.execute("""
+            INSERT INTO cosmetica_alertas
+                (data, produto_id, produto, tipo, preco, desconto_percent, diff_media)
+            VALUES (%s, %s, %s, 'media', %s, %s, %s)
+            ON CONFLICT (data, produto_id, tipo) DO NOTHING
+        """, (hoje, a["produto_id"], a["produto"], a["preco"],
+              a["desc_hoje"], float(a["diferenca"])))
+    except Exception as e:
+        print(f"Aviso: nao guardou alerta media [{a['produto_id']}]: {e}")
+
+for a in alertas_minimo:
+    try:
+        cursor.execute("""
+            INSERT INTO cosmetica_alertas
+                (data, produto_id, produto, tipo, preco, desconto_percent, preco_minimo_hist)
+            VALUES (%s, %s, %s, 'minimo', %s, %s, %s)
+            ON CONFLICT (data, produto_id, tipo) DO NOTHING
+        """, (hoje, a["produto_id"], a["produto"], a["preco"],
+              a["desc_hoje"], a["preco_minimo"]))
+    except Exception as e:
+        print(f"Aviso: nao guardou alerta minimo [{a['produto_id']}]: {e}")
+
+conn.commit()
+print(f"Historico de alertas: {len(alertas_media)} media + {len(alertas_minimo)} minimos guardados.")
 
 conn.close()

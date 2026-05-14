@@ -176,6 +176,27 @@
   /* HISTORY MIN/MAX */
   .min-tag { background: rgba(13,148,136,0.12); color: #0d9488; font-size: 10px; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
   .max-tag { background: rgba(220,38,38,0.1); color: #dc2626; font-size: 10px; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+
+  /* WATCHLIST STAR */
+  .star-btn { background: none; border: none; cursor: pointer; font-size: 17px; padding: 0; line-height: 1; opacity: 0.3; transition: opacity .15s, transform .15s; flex-shrink: 0; margin-left: auto; }
+  .star-btn:hover { opacity: 0.75; transform: scale(1.2); }
+  .star-btn.starred { opacity: 1; color: var(--gold); }
+  .watch-badge { background: var(--gold-dim); color: var(--gold); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+
+  /* ALERT HISTORY ITEM */
+  .alert-hist-item { display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); margin-bottom: 6px; font-size: 12px; }
+  .alert-hist-date { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); min-width: 84px; flex-shrink: 0; }
+  .alert-hist-tipo { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; flex-shrink: 0; }
+  .hist-minimo { background: var(--gold-dim); color: var(--gold); }
+  .hist-media  { background: var(--pink-dim); color: var(--pink); }
+
+  /* MULTI-SELECT COMPARAR */
+  .multi-sel { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; padding: 4px; width: 100%; }
+  .multi-sel option { padding: 5px 8px; }
+
+  /* HEATMAP SAZONALIDADE */
+  .sazon-insight { font-size: 13px; padding: 10px 14px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); margin-bottom: 14px; }
+  .sazon-insight b { color: var(--pink); }
 </style>
 </head>
 <body>
@@ -189,6 +210,8 @@
     <button class="tab" id="tab-alertas" onclick="showPage('p4',this)">Alertas</button>
     <button class="tab" onclick="showPage('p5',this)">Produtos</button>
     <button class="tab" onclick="showPage('p6',this)">Previsão</button>
+    <button class="tab" onclick="showPage('p7',this)">Sazonalidade</button>
+    <button class="tab" onclick="showPage('p8',this)">Comparar</button>
   </div>
   <button id="theme-toggle" onclick="toggleTheme()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">🌙 Escuro</button>
   <div class="last-update" id="last-update">A carregar...</div>
@@ -277,7 +300,7 @@
     <h2>Centro de Alertas</h2>
     <p>Produtos com desconto acima da média histórica semanal ou no mínimo de sempre</p>
   </div>
-  <div class="grid-2">
+  <div class="grid-2" style="margin-bottom:14px">
     <div>
       <div class="card-title" style="margin-bottom:10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">🏆 Mínimo histórico</div>
       <div id="alertas-minimo"><div class="loading" style="padding:30px"><div class="spinner"></div></div></div>
@@ -286,6 +309,20 @@
       <div class="card-title" style="margin-bottom:10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">📈 Desconto acima da média</div>
       <div id="alertas-media"><div class="loading" style="padding:30px"><div class="spinner"></div></div></div>
     </div>
+  </div>
+  <div class="grid-2" style="margin-bottom:14px">
+    <div>
+      <div class="card-title" style="margin-bottom:10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">🔔 Voltou ao preço normal</div>
+      <div id="alertas-voltou"><div class="loading" style="padding:30px"><div class="spinner"></div></div></div>
+    </div>
+    <div>
+      <div class="card-title" style="margin-bottom:10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">⭐ Watchlist em promoção</div>
+      <div id="alertas-watchlist"><div class="loading" style="padding:30px"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+  <div>
+    <div class="card-title" style="margin-bottom:10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">📋 Histórico de alertas disparados</div>
+    <div id="alertas-historico"><div class="loading" style="padding:30px"><div class="spinner"></div></div></div>
   </div>
 </div>
 
@@ -322,17 +359,48 @@ const SUPA_URL      = 'https://lfqhvioqgvksqrdxfgyy.supabase.co/rest/v1/cosmetic
 const SUPA_PROD_URL = 'https://lfqhvioqgvksqrdxfgyy.supabase.co/rest/v1/cosmetica_produtos';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmcWh2aW9xZ3Zrc3FyZHhmZ3l5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NDk3MDgsImV4cCI6MjA5MDEyNTcwOH0.x3oNaD6_YbWeknI3RQBldZ-MhIMr-I1k1dVFit5dit0';
 
-let ALL = [], HOJE = '', DATAS = [], PRODUTOS = [], IMGS = {};
+const PRODUCT_URLS = {
+  "P01": "https://www.continente.pt/produto/serum-de-rosto-fluido-uv-diario-fps-50-nivea-nivea-8215194.html",
+  "P02": "https://www.continente.pt/produto/creme-de-rosto-dia-q10-energy-antirrugas-fps15-nivea-nivea-5028703.html",
+  "P03": "https://www.continente.pt/produto/serum-facial-glow-beauty-of-joseon-beauty-of-joseon-7983861.html",
+  "P04": "https://www.continente.pt/produto/creme-de-rosto-dynasty-beauty-of-joseon-beauty-of-joseon-7983865.html",
+  "P05": "https://www.continente.pt/produto/serum-facial-preenchedor-aloe-hialuronico-garnier-skin-active-garnier-skin-active-7713344.html",
+  "P06": "https://www.continente.pt/produto/serum-facial-revitalift-filler-antirrugas-loreal-paris-loreal-paris-7094090.html",
+  "P07": "https://www.continente.pt/produto/serum-facial-revitalift-clinical-vitamina-c-loreal-paris-loreal-paris-7713327.html",
+  "P08": "https://www.continente.pt/produto/creme-de-rosto-dia-cellular-luminous-630-antimanchas-fps50-30-nivea-nivea-7341889.html",
+  "P09": "https://www.continente.pt/produto/serum-facial-noite-revitalift-laser-loreal-paris-loreal-paris-7346510.html",
+  "P10": "https://www.continente.pt/produto/serum-de-rosto-rejuvenescedor-cellular-epigenetics-nivea-nivea-8457679.html",
+  "P11": "https://www.continente.pt/produto/serum-facial-antimanchas-vitamina-c-garnier-skin-active-garnier-skin-active-7514731.html",
+  "P12": "https://www.continente.pt/produto/serum-de-rosto-q10-dupla-acao-nivea-nivea-7985612.html",
+  "P13": "https://www.continente.pt/produto/serum-de-rosto-cellular-luminous-630-antimanchas-nivea-nivea-7341888.html",
+  "P14": "https://www.continente.pt/produto/serum-facial-age-perfect-le-duo-rejuvenescedor-loreal-paris-loreal-paris-8110588.html",
+  "P15": "https://www.continente.pt/produto/creme-de-rosto-dia-revitalift-filler-fps-50-loreal-paris-loreal-paris-7382344.html",
+  "P16": "https://www.continente.pt/produto/creme-de-rosto-dia-revitalift-filler-micro-gel-loreal-paris-loreal-paris-7713331.html",
+  "P17": "https://www.continente.pt/produto/serum-facial-vitamina-c-fps-25-garnier-skin-active-garnier-skin-active-7514729.html",
+  "P18": "https://www.continente.pt/produto/bb-cream-bege-brilhante-n.13-missha-missha-7983880.html",
+  "P19": "https://www.continente.pt/produto/serum-de-rosto-antirugas-q10-collagen-expert-nivea-nivea-8716894.html",
+  "P20": "https://www.continente.pt/produto/serum-facial-revitalift-antirrugas-e-reparacao-loreal-paris-loreal-paris-7801609.html",
+};
+
+const MIN_DIFF_MEDIA = 10;  // pp acima da média histórica para disparar alerta
+
+const SUPA_ALERT_URL = 'https://lfqhvioqgvksqrdxfgyy.supabase.co/rest/v1/cosmetica_alertas';
+let WATCHLIST = new Set(JSON.parse(localStorage.getItem('cosm-watchlist') || '[]'));
+let ALL = [], HOJE = '', DATAS = [], PRODUTOS = [], IMGS = {}, ALERT_HIST = [];
 let CHARTS = {};
 
 const fmt  = v => v != null ? v.toFixed(2) + ' €' : '—';
 const imgCell = (id, size='sm') => {
   const url = IMGS[id];
+  const prodUrl = PRODUCT_URLS[id];
   const tooltip = url
     ? `<div class="img-tooltip"><img src="${url}" alt=""></div>`
     : `<div class="img-tooltip"><div class="img-tooltip-placeholder">🧴</div></div>`;
-  if (url) return `<div class="img-hover-wrap"><img src="${url}" class="prod-img-${size}" alt="" onerror="this.style.display='none'">${tooltip}</div>`;
-  return `<div class="img-hover-wrap"><div class="prod-img-${size}-placeholder">🧴</div>${tooltip}</div>`;
+  const inner = url
+    ? `<div class="img-hover-wrap"><img src="${url}" class="prod-img-${size}" alt="" onerror="this.style.display='none'">${tooltip}</div>`
+    : `<div class="img-hover-wrap"><div class="prod-img-${size}-placeholder">🧴</div>${tooltip}</div>`;
+  if (prodUrl) return `<a href="${prodUrl}" target="_blank" rel="noopener" style="display:inline-block;line-height:0">${inner}</a>`;
+  return inner;
 };
 const fmtP = v => v != null ? v.toFixed(1) + '%' : '—';
 
@@ -376,6 +444,15 @@ async function loadData() {
     const imgData = await ri.json();
     imgData.forEach(p => { if (p.imagem_url && p.imagem_url !== 'COLAR_URL_IMAGEM_AQUI') IMGS[p.produto_id] = p.imagem_url; });
   } catch(e) { console.warn('Imagens nao carregadas:', e); }
+
+  // Fetch alert history
+  try {
+    const ra = await fetch(SUPA_ALERT_URL + '?select=*&order=data.desc&limit=50', {
+      headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY }
+    });
+    ALERT_HIST = await ra.json();
+    if (!Array.isArray(ALERT_HIST)) ALERT_HIST = [];
+  } catch(e) { ALERT_HIST = []; }
 
   if (!ALL.length) {
     document.getElementById('loading1').innerHTML = '<p style="color:#f87171">Sem dados. Verifica o RLS no Supabase.</p>';
@@ -711,8 +788,9 @@ function renderAlertas() {
     if (minHist != null && hojeRow.preco <= minHist) {
       alertasMinimo.push({ ...hojeRow, minHist, semanas: semanas.length });
     }
-    if (mediaDesc != null && hojeRow.desconto_percent > mediaDesc) {
-      alertasMedia.push({ ...hojeRow, mediaDesc, diff: hojeRow.desconto_percent - mediaDesc, semanas: semanas.length });
+    const diffMedia = mediaDesc != null ? hojeRow.desconto_percent - mediaDesc : 0;
+    if (mediaDesc != null && diffMedia >= MIN_DIFF_MEDIA) {
+      alertasMedia.push({ ...hojeRow, mediaDesc, diff: diffMedia, semanas: semanas.length });
     }
   });
 
@@ -724,19 +802,104 @@ function renderAlertas() {
       ? `<div class="alert-item"><div class="alert-body"><div class="alert-name" style="color:var(--muted)">A acumular histórico...</div><div class="alert-detail">Precisas de pelo menos 4 semanas de dados. Tens aproximadamente ${semanas} semana(s).</div></div></div>`
       : `<div class="alert-item"><div class="alert-body"><div class="alert-name" style="color:var(--muted)">Nenhum mínimo histórico hoje</div><div class="alert-detail">Os preços de hoje estão acima do mínimo histórico em todos os produtos.</div></div></div>`;
   } else {
-    divMin.innerHTML = alertasMinimo.sort((a, b) => a.preco - b.preco).map(a => `
+    divMin.innerHTML = alertasMinimo.sort((a, b) => a.preco - b.preco).map(a => {
+      const imgUrl = IMGS[a.produto_id];
+      const prodUrl = PRODUCT_URLS[a.produto_id];
+      const imgHtml = imgUrl
+        ? `<img src="${imgUrl}" style="width:52px;height:52px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid var(--border);padding:3px;flex-shrink:0" alt="" onerror="this.style.display='none'">`
+        : `<div style="width:52px;height:52px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🧴</div>`;
+      const imgWrap = prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="display:inline-block;line-height:0;flex-shrink:0">${imgHtml}</a>` : imgHtml;
+      const nameHtml = prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:500">${a.produto}</a>` : a.produto;
+      return `
       <div class="alert-item">
         <div class="alert-icon alert-icon-record">🏆</div>
+        ${imgWrap}
         <div class="alert-body">
-          <div class="alert-name">${a.produto}</div>
+          <div class="alert-name">${nameHtml}</div>
           <div class="alert-detail"><span class="id-badge">${a.produto_id || '—'}</span> · Mínimo histórico de sempre · ${a.semanas} semanas de dados</div>
         </div>
         <div class="alert-price">
           <div class="alert-price-val" style="color:var(--gold)">${fmt(a.preco)}</div>
           <div class="alert-price-sub">${fmtP(a.desconto_percent)} desconto</div>
+          ${prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:11px;color:var(--pink);text-decoration:none;font-weight:500">Ver no site →</a>` : ''}
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
+
+  // ── Voltou ao preço normal ──────────────────────────────────────────────
+  const divVoltou = document.getElementById('alertas-voltou');
+  if (divVoltou) {
+    const dataPrev = DATAS.filter(d => d < HOJE).slice(-1)[0];
+    const prevData = dataPrev ? ALL.filter(d => d.data === dataPrev) : [];
+    const voltou = hoje
+      .filter(d => !d.desconto_percent || d.desconto_percent < 5)
+      .map(d => {
+        const p = prevData.find(r => r.produto === d.produto);
+        return (p && (p.desconto_percent || 0) >= 15) ? { ...d, prevDesc: p.desconto_percent, prevPreco: p.preco } : null;
+      })
+      .filter(Boolean);
+
+    if (!voltou.length) {
+      divVoltou.innerHTML = `<div class="alert-item"><div class="alert-body"><div class="alert-name" style="color:var(--muted)">Nenhuma promoção terminou hoje</div><div class="alert-detail">Todos os produtos mantêm o mesmo estado de promoção.</div></div></div>`;
+    } else {
+      divVoltou.innerHTML = voltou.map(a => {
+        const prodUrl = PRODUCT_URLS[a.produto_id];
+        const nameHtml = prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:500">${a.produto}</a>` : a.produto;
+        return `<div class="alert-item">
+          <div class="alert-icon" style="background:var(--teal-dim)">🔔</div>
+          <div class="alert-body">
+            <div class="alert-name">${nameHtml}</div>
+            <div class="alert-detail"><span class="id-badge">${a.produto_id||'—'}</span> · Tinha ${a.prevDesc?.toFixed(1)}% de desconto · voltou ao preço normal</div>
+          </div>
+          <div class="alert-price">
+            <div class="alert-price-val" style="color:var(--muted)">${fmt(a.preco)}</div>
+            <div class="alert-price-sub">era ${fmt(a.prevPreco)}</div>
+            ${prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:11px;color:var(--pink);text-decoration:none;font-weight:500">Ver no site →</a>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // ── Watchlist em promoção ───────────────────────────────────────────────
+  const divWatch = document.getElementById('alertas-watchlist');
+  if (divWatch) {
+    if (!WATCHLIST.size) {
+      divWatch.innerHTML = `<div class="alert-item"><div class="alert-body"><div class="alert-name" style="color:var(--muted)">Watchlist vazia</div><div class="alert-detail">Adiciona estrelas ⭐ nos cards da página Produtos para seguir produtos específicos.</div></div></div>`;
+    } else {
+      const watchItems = hoje.filter(d => WATCHLIST.has(d.produto_id));
+      if (!watchItems.length) {
+        divWatch.innerHTML = `<div class="alert-item"><div class="alert-body"><div class="alert-name" style="color:var(--muted)">Sem dados hoje para os produtos da watchlist</div></div></div>`;
+      } else {
+        divWatch.innerHTML = watchItems.sort((a,b) => (b.desconto_percent||0)-(a.desconto_percent||0)).map(a => {
+          const imgUrl = IMGS[a.produto_id];
+          const prodUrl = PRODUCT_URLS[a.produto_id];
+          const imgHtml = imgUrl
+            ? `<img src="${imgUrl}" style="width:48px;height:48px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid var(--border);padding:3px;flex-shrink:0" alt="">`
+            : `<div style="width:48px;height:48px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🧴</div>`;
+          const imgWrap = prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="line-height:0;flex-shrink:0">${imgHtml}</a>` : imgHtml;
+          const nameHtml = prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:500">${a.produto}</a>` : a.produto;
+          const hasPromo = (a.desconto_percent || 0) > 0;
+          return `<div class="alert-item">
+            <div class="alert-icon" style="background:var(--gold-dim)">⭐</div>
+            ${imgWrap}
+            <div class="alert-body">
+              <div class="alert-name">${nameHtml}</div>
+              <div class="alert-detail"><span class="id-badge">${a.produto_id||'—'}</span> · ${hasPromo ? `<span style="color:var(--success)">${fmtP(a.desconto_percent)} desconto hoje</span>` : 'Sem promoção hoje'}</div>
+            </div>
+            <div class="alert-price">
+              <div class="alert-price-val" style="color:${hasPromo?'var(--pink)':'var(--text)'}">${fmt(a.preco)}</div>
+              ${a.pvpr ? `<div class="alert-price-sub strike">${fmt(a.pvpr)}</div>` : ''}
+              ${prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:11px;color:var(--pink);text-decoration:none;font-weight:500">Ver no site →</a>` : ''}
+            </div>
+          </div>`;
+        }).join('');
+      }
+    }
+  }
+
+  renderHistoricoAlertas();
 
   // Render acima da média
   const divMed = document.getElementById('alertas-media');
@@ -746,18 +909,29 @@ function renderAlertas() {
       ? `<div class="alert-item"><div class="alert-body"><div class="alert-name" style="color:var(--muted)">A acumular histórico...</div><div class="alert-detail">Precisas de pelo menos 4 semanas de dados. Tens aproximadamente ${semanas} semana(s).</div></div></div>`
       : `<div class="alert-item"><div class="alert-body"><div class="alert-name" style="color:var(--muted)">Nenhum desconto acima da média hoje</div><div class="alert-detail">Os descontos de hoje estão dentro da média histórica semanal.</div></div></div>`;
   } else {
-    divMed.innerHTML = alertasMedia.sort((a, b) => b.diff - a.diff).map(a => `
+    divMed.innerHTML = alertasMedia.sort((a, b) => b.diff - a.diff).map(a => {
+      const imgUrl = IMGS[a.produto_id];
+      const prodUrl = PRODUCT_URLS[a.produto_id];
+      const imgHtml = imgUrl
+        ? `<img src="${imgUrl}" style="width:52px;height:52px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid var(--border);padding:3px;flex-shrink:0" alt="" onerror="this.style.display='none'">`
+        : `<div style="width:52px;height:52px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🧴</div>`;
+      const imgWrap = prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="display:inline-block;line-height:0;flex-shrink:0">${imgHtml}</a>` : imgHtml;
+      const nameHtml = prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-weight:500">${a.produto}</a>` : a.produto;
+      return `
       <div class="alert-item">
         <div class="alert-icon alert-icon-above">📈</div>
+        ${imgWrap}
         <div class="alert-body">
-          <div class="alert-name">${a.produto}</div>
+          <div class="alert-name">${nameHtml}</div>
           <div class="alert-detail"><span class="id-badge">${a.produto_id || '—'}</span> · Média histórica: ${a.mediaDesc.toFixed(1)}% · +${a.diff.toFixed(1)}% acima · ${a.semanas} semanas</div>
         </div>
         <div class="alert-price">
           <div class="alert-price-val" style="color:var(--pink)">${fmtP(a.desconto_percent)}</div>
           <div class="alert-price-sub">${fmt(a.preco)} hoje</div>
+          ${prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:11px;color:var(--pink);text-decoration:none;font-weight:500">Ver no site →</a>` : ''}
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
 }
 
@@ -805,13 +979,32 @@ function renderProdutos() {
     const minFlag = isMin(p) ? `<span class="min-tag">MIN</span>` : '';
     const pvprHtml = p.pvpr ? `<span style="text-decoration:line-through;color:var(--muted);font-size:13px">${fmt(p.pvpr)}</span>` : '';
 
+    const prodUrl = PRODUCT_URLS[p.produto_id];
+    const imgWrapped = prodUrl
+      ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="display:block;line-height:0">${imgHtml}</a>`
+      : imgHtml;
+
+    // Best month for this product
+    const MESES_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const pmRows = ALL.filter(d => d.produto === p.produto && d.desconto_percent > 0);
+    let bestMonthHtml = '';
+    if (pmRows.length >= 8) {
+      const pm = Array(12).fill(null).map(() => []);
+      pmRows.forEach(d => pm[new Date(d.data).getMonth()].push(d.desconto_percent));
+      const avgPM = pm.map(arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null);
+      const bm = avgPM.reduce((b,v,i) => (v!=null&&(b===-1||v>avgPM[b]))?i:b, -1);
+      if (bm >= 0) bestMonthHtml = `<span style="font-size:10px;color:var(--muted)">Melhor mês: <b style="color:var(--teal)">${MESES_SHORT[bm]}</b></span>`;
+    }
+
+    const starred = WATCHLIST.has(p.produto_id);
     return `<div class="prod-card">
-      ${imgHtml}
+      ${imgWrapped}
       <div style="display:flex;align-items:center;gap:6px">
         <span class="prod-card-id">${p.produto_id}</span>
         ${promoBadge(p.desconto_percent)}
+        <button class="star-btn ${starred?'starred':''}" onclick="event.preventDefault();toggleWatchlist('${p.produto_id}')" title="${starred?'Remover da watchlist':'Adicionar à watchlist'}">${starred?'★':'☆'}</button>
       </div>
-      <div class="prod-card-name">${p.produto}</div>
+      <div class="prod-card-name">${prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${p.produto}</a>` : p.produto}</div>
       <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
         <span class="prod-card-price" style="color:${p.desconto_euros > 0 ? 'var(--pink)' : 'var(--text)'}">${fmt(p.preco)} ${minFlag}</span>
         ${pvprHtml}
@@ -823,6 +1016,156 @@ function renderProdutos() {
         </div>
         <span style="font-size:11px;color:var(--muted)">${p.dias} dias</span>
       </div>
+      ${bestMonthHtml ? `<div style="padding-top:4px">${bestMonthHtml}</div>` : ''}
+      ${prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="display:block;text-align:center;font-size:12px;font-weight:500;color:var(--pink);text-decoration:none;padding:6px 0;border-top:1px solid var(--border);margin-top:4px">Ver no Continente →</a>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── WATCHLIST ─────────────────────────────────────────────────────────────
+function toggleWatchlist(id) {
+  WATCHLIST.has(id) ? WATCHLIST.delete(id) : WATCHLIST.add(id);
+  localStorage.setItem('cosm-watchlist', JSON.stringify([...WATCHLIST]));
+  renderProdutos();
+  renderAlertas();
+}
+
+// ── PAGE 7 — SAZONALIDADE ─────────────────────────────────────────────────
+function renderSazonalidade() {
+  const sel = document.getElementById('sel-sazon')?.value || '_all';
+  const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const DIAS  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+  const filter = d => (sel === '_all' || d.produto === sel) && d.desconto_percent != null && d.desconto_percent > 0;
+  const byMonth = Array(12).fill(null).map(() => []);
+  const byDow   = Array(7).fill(null).map(() => []);
+  ALL.filter(filter).forEach(d => {
+    const dt = new Date(d.data);
+    byMonth[dt.getMonth()].push(d.desconto_percent);
+    byDow[dt.getDay()].push(d.desconto_percent);
+  });
+  const avg = arr => arr.length ? arr.reduce((a,b) => a+b, 0) / arr.length : null;
+  const avgMonth = byMonth.map(avg);
+  const avgDow   = byDow.map(avg);
+
+  const bestMonthIdx = avgMonth.reduce((best, v, i) => (v != null && (best === -1 || v > avgMonth[best])) ? i : best, -1);
+  const bestDowIdx   = avgDow.reduce((best, v, i) => (v != null && (best === -1 || v > avgDow[best])) ? i : best, -1);
+
+  const colorsMonth = avgMonth.map((v, i) => i === bestMonthIdx ? 'rgba(244,114,182,0.85)' : 'rgba(167,139,250,0.5)');
+  const colorsDow   = avgDow.map((v, i) => i === bestDowIdx ? 'rgba(244,114,182,0.85)' : 'rgba(45,212,191,0.5)');
+
+  destroyChart('chart-sazon-mes');
+  CHARTS['chart-sazon-mes'] = new Chart(document.getElementById('chart-sazon-mes'), {
+    type: 'bar',
+    data: { labels: MESES, datasets: [{ data: avgMonth, backgroundColor: colorsMonth, borderWidth: 0, borderRadius: 4 }] },
+    options: { responsive: true, plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false }, ticks: { color: '#9090a0' } },
+        y: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#9090a0', callback: v => v != null ? v.toFixed(1)+'%' : '' } } } }
+  });
+
+  destroyChart('chart-sazon-dia');
+  CHARTS['chart-sazon-dia'] = new Chart(document.getElementById('chart-sazon-dia'), {
+    type: 'bar',
+    data: { labels: DIAS, datasets: [{ data: avgDow, backgroundColor: colorsDow, borderWidth: 0, borderRadius: 4 }] },
+    options: { responsive: true, plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false }, ticks: { color: '#9090a0' } },
+        y: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#9090a0', callback: v => v != null ? v.toFixed(1)+'%' : '' } } } }
+  });
+
+  const ins = document.getElementById('sazon-insight');
+  if (bestMonthIdx >= 0 && avgMonth[bestMonthIdx] != null) {
+    ins.innerHTML = `Melhor mês para comprar: <b>${MESES[bestMonthIdx]}</b> (média ${avgMonth[bestMonthIdx].toFixed(1)}% de desconto) &nbsp;·&nbsp; Melhor dia da semana: <b>${DIAS[bestDowIdx]}</b> (média ${avgDow[bestDowIdx]?.toFixed(1)}%)`;
+  } else {
+    ins.innerHTML = `<span style="color:var(--muted)">Dados insuficientes para análise sazonal — precisas de mais histórico.</span>`;
+  }
+
+  // Per-product best month table
+  let html = '<thead><tr><th>ID</th><th>Produto</th><th>Melhor mês</th><th>Desc. médio nesse mês</th><th>Melhor dia</th><th>Desc. médio nesse dia</th></tr></thead><tbody>';
+  PRODUTOS.forEach(p => {
+    const rows = ALL.filter(d => d.produto === p && d.desconto_percent > 0);
+    if (rows.length < 5) return;
+    const pm = Array(12).fill(null).map(() => []);
+    const pd = Array(7).fill(null).map(() => []);
+    rows.forEach(d => { const dt = new Date(d.data); pm[dt.getMonth()].push(d.desconto_percent); pd[dt.getDay()].push(d.desconto_percent); });
+    const avgPM = pm.map(avg); const avgPD = pd.map(avg);
+    const bm = avgPM.reduce((b,v,i) => (v!=null && (b===-1||v>avgPM[b]))?i:b, -1);
+    const bd = avgPD.reduce((b,v,i) => (v!=null && (b===-1||v>avgPD[b]))?i:b, -1);
+    const id = rows[0].produto_id || '—';
+    html += `<tr>
+      <td><span class="id-badge">${id}</span></td>
+      <td style="font-size:12px">${p.length>40?p.slice(0,38)+'…':p}</td>
+      <td><b style="color:var(--pink)">${bm>=0?MESES[bm]:'—'}</b></td>
+      <td>${bm>=0?avgPM[bm].toFixed(1)+'%':'—'}</td>
+      <td><b style="color:var(--teal)">${bd>=0?DIAS[bd]:'—'}</b></td>
+      <td>${bd>=0?avgPD[bd].toFixed(1)+'%':'—'}</td>
+    </tr>`;
+  });
+  document.getElementById('tabela-sazon').innerHTML = html + '</tbody>';
+}
+
+// ── PAGE 8 — COMPARAR ─────────────────────────────────────────────────────
+function renderComparador() {
+  const sel = document.getElementById('sel-comparar-prods');
+  if (!sel) return;
+  const selected = [...sel.options].filter(o => o.selected).map(o => o.value);
+  const empty = document.getElementById('comparar-empty');
+  if (!selected.length) { if(empty) empty.style.display=''; return; }
+  if(empty) empty.style.display = 'none';
+
+  const COLORS = ['#f472b6','#a78bfa','#2dd4bf','#fbbf24','#f87171','#60a5fa'];
+  const datasets = selected.map((p, i) => ({
+    label: p.length > 30 ? p.slice(0,28)+'…' : p,
+    data: DATAS.map(d => { const r = ALL.find(row => row.data===d && row.produto===p); return r ? r.preco : null; }),
+    borderColor: COLORS[i % COLORS.length], backgroundColor: 'transparent',
+    tension: 0.3, pointRadius: 2, spanGaps: true, borderWidth: 2
+  }));
+
+  destroyChart('chart-comparar');
+  CHARTS['chart-comparar'] = new Chart(document.getElementById('chart-comparar'), {
+    type: 'line', data: { labels: DATAS.map(d => d.slice(5)), datasets },
+    options: { responsive: true, interaction: { mode: 'index' },
+      plugins: { legend: { labels: { color: '#9090a0', font: { size: 11 }, boxWidth: 12 } } },
+      scales: { x: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#9090a0', maxTicksLimit: 12 } },
+        y: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#9090a0', callback: v => v.toFixed(2)+' €' } } } }
+  });
+
+  let html = '<thead><tr><th>Produto</th><th>Hoje</th><th>PVPR</th><th>Desconto</th><th>Mín histórico</th><th>Máx histórico</th></tr></thead><tbody>';
+  selected.forEach((p, i) => {
+    const hoje = ALL.find(r => r.data===HOJE && r.produto===p);
+    const prices = ALL.filter(r => r.produto===p && r.preco!=null).map(r => r.preco);
+    html += `<tr>
+      <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${COLORS[i%COLORS.length]};margin-right:6px;vertical-align:middle"></span>${p.length>38?p.slice(0,36)+'…':p}</td>
+      <td class="${hoje?.desconto_euros>0?'green':''}">${fmt(hoje?.preco)}</td>
+      <td class="strike">${fmt(hoje?.pvpr)}</td>
+      <td>${promoBadge(hoje?.desconto_percent)}</td>
+      <td><span class="min-tag">${prices.length?Math.min(...prices).toFixed(2)+' €':'—'}</span></td>
+      <td><span class="max-tag">${prices.length?Math.max(...prices).toFixed(2)+' €':'—'}</span></td>
+    </tr>`;
+  });
+  document.getElementById('tabela-comparar').innerHTML = html + '</tbody>';
+}
+
+// ── HISTÓRICO DE ALERTAS ──────────────────────────────────────────────────
+function renderHistoricoAlertas() {
+  const div = document.getElementById('alertas-historico');
+  if (!div) return;
+  if (!ALERT_HIST.length) {
+    div.innerHTML = `<div class="alert-item"><div class="alert-body"><div class="alert-name" style="color:var(--muted)">Sem histórico ainda</div><div class="alert-detail">Os alertas ficam registados aqui assim que a tabela <code>cosmetica_alertas</code> for criada no Supabase.</div></div></div>`;
+    return;
+  }
+  div.innerHTML = ALERT_HIST.map(a => {
+    const tipoClass = a.tipo === 'minimo' ? 'hist-minimo' : 'hist-media';
+    const tipoLabel = a.tipo === 'minimo' ? '🏆 Mínimo' : '📈 Média';
+    const prodUrl = PRODUCT_URLS[a.produto_id];
+    const name = prodUrl ? `<a href="${prodUrl}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${a.produto}</a>` : a.produto;
+    const extra = a.tipo === 'media' && a.diff_media ? ` · +${parseFloat(a.diff_media).toFixed(1)}pp acima da média` : a.tipo === 'minimo' && a.preco_minimo_hist ? ` · mín. anterior ${parseFloat(a.preco_minimo_hist).toFixed(2)} €` : '';
+    return `<div class="alert-hist-item">
+      <span class="alert-hist-date">${a.data}</span>
+      <span class="alert-hist-tipo ${tipoClass}">${tipoLabel}</span>
+      <span class="id-badge">${a.produto_id||'—'}</span>
+      <span style="flex:1;font-size:12px">${name}</span>
+      <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--pink)">${fmt(a.preco)}</span>
+      <span style="font-size:11px;color:var(--muted)">${fmtP(a.desconto_percent)}${extra}</span>
     </div>`;
   }).join('');
 }
@@ -833,7 +1176,7 @@ function toggleTheme() {
   document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
   document.getElementById('theme-toggle').textContent = isDark ? '🌙 Escuro' : '☀️ Claro';
   localStorage.setItem('cosm-theme', isDark ? 'light' : 'dark');
-  if (ALL.length) { renderHoje(); renderPromocoes(); renderHistorico(); renderAlertas(); renderProdutos(); renderPrevisao(); }
+  if (ALL.length) { renderHoje(); renderPromocoes(); renderHistorico(); renderAlertas(); renderProdutos(); renderPrevisao(); renderSazonalidade(); }
 }
 (function() {
   const saved = localStorage.getItem('cosm-theme');
@@ -893,10 +1236,22 @@ function populateDateSelectors() {
   const datas = [...new Set(ALL.map(d => d.data))].sort().reverse();
   const sel = document.getElementById('date-produtos');
   if (sel) sel.innerHTML = datas.map((d,i) => `<option value="${d}"${i===0?' selected':''}>${d}</option>`).join('');
-  // populate previsão selector
+
   const selP = document.getElementById('sel-prev-prod');
   if (selP) {
     PRODUTOS.forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p.length > 45 ? p.slice(0,43)+'…' : p; selP.appendChild(o); });
+  }
+
+  // Sazonalidade selector
+  const selS = document.getElementById('sel-sazon');
+  if (selS && selS.options.length === 1) {
+    PRODUTOS.forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p.length > 45 ? p.slice(0,43)+'…' : p; selS.appendChild(o); });
+  }
+
+  // Comparar multi-select
+  const selC = document.getElementById('sel-comparar-prods');
+  if (selC && !selC.options.length) {
+    PRODUTOS.forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p.length > 50 ? p.slice(0,48)+'…' : p; selC.appendChild(o); });
   }
 }
 
@@ -982,6 +1337,8 @@ loadData()
   .then(() => {
     populateDateSelectors();
     renderAlertas();
+    renderSazonalidade();
+    renderHistoricoAlertas();
     setTimeout(updateAlertBadge, 500);
     scheduleAutoRefresh();
   })
@@ -1008,6 +1365,55 @@ loadData()
   <div class="card">
     <div class="card-title">Previsão para os próximos 7 dias</div>
     <div style="overflow-x:auto"><table class="tbl" id="tabela-prev"></table></div>
+  </div>
+</div>
+<!-- PAGE 7 — SAZONALIDADE -->
+<div class="page" id="p7">
+  <div class="page-header">
+    <h2>Sazonalidade</h2>
+    <p>Em que meses e dias da semana os descontos são historicamente maiores</p>
+  </div>
+  <div class="filter-row">
+    <label>Produto:</label>
+    <select id="sel-sazon" onchange="renderSazonalidade()"><option value="_all">Todos (média)</option></select>
+  </div>
+  <div id="sazon-insight" class="sazon-insight"></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Desconto médio por mês</div>
+      <canvas id="chart-sazon-mes" style="max-height:240px"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Desconto médio por dia da semana</div>
+      <canvas id="chart-sazon-dia" style="max-height:240px"></canvas>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Melhor época de compra por produto</div>
+    <div style="overflow-x:auto"><table class="tbl" id="tabela-sazon"></table></div>
+  </div>
+</div>
+
+<!-- PAGE 8 — COMPARAR -->
+<div class="page" id="p8">
+  <div class="page-header">
+    <h2>Comparador de Produtos</h2>
+    <p>Sobrepõe o histórico de preços de vários produtos no mesmo gráfico</p>
+  </div>
+  <div class="grid-2" style="margin-bottom:14px;align-items:start">
+    <div class="card">
+      <div class="card-title">Selecionar produtos (Ctrl+clique para múltiplos)</div>
+      <select id="sel-comparar-prods" class="multi-sel" multiple size="8" onchange="renderComparador()"></select>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
+      <div class="card-title">Tabela comparativa — hoje</div>
+      <div id="comparar-empty" style="color:var(--muted);font-size:13px;padding:20px 0">Seleciona pelo menos um produto à esquerda.</div>
+      <div style="overflow-x:auto"><table class="tbl" id="tabela-comparar"></table></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Evolução de preços</div>
+    <canvas id="chart-comparar" style="max-height:300px"></canvas>
   </div>
 </div>
 </body>
